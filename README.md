@@ -1,13 +1,13 @@
-# CareAccess AI
+# CareAccess MCP
 
 > An MCP-powered insurance access copilot for point-of-care healthcare decisions.
 
-CareAccess AI helps clinicians quickly understand whether a medication, procedure,
+CareAccess MCP helps clinicians quickly understand whether a medication, procedure,
 lab, or imaging order is likely covered by a patient's insurance plan, whether
 prior authorization is needed, what alternatives may be covered, and what the
 patient may need to pay.
 
-"CareAccess AI is an MCP Superpower that helps healthcare agents remove insurance friction at the point of care by checking coverage, prior authorization, patient cost, and generating reviewable PA packets from FHIR/SHARP context."
+"CareAccess MCP is a Superpower server that helps healthcare agents remove insurance friction at the point of care by checking coverage, prior authorization, patient cost, and generating reviewable PA packets from FHIR/SHARP context."
 
 Built for the Prompt Opinion Agents Assemble Hackathon, this project focuses on
 the **Superpower (MCP)** track: a reusable MCP server that other agents can invoke
@@ -19,14 +19,14 @@ Clinicians often choose treatments without real-time visibility into insurance
 rules. That creates delayed care, surprise costs, extra administrative work, and
 avoidable denials.
 
-CareAccess AI turns coverage checks into an agent-ready workflow:
+CareAccess MCP turns coverage checks into an agent-ready workflow:
 
 1. Receive patient and encounter context from Prompt Opinion through SHARP/FHIR.
 2. Match the requested treatment against synthetic payer rules.
 3. Use Gemini to generate clear clinical and patient-facing explanations.
 4. Return structured outputs that another agent or clinician can act on.
 
-In short: **CareAccess AI is an insurance coverage and prior authorization
+In short: **CareAccess MCP is an insurance coverage and prior authorization
 superpower for healthcare agents.**
 
 ## MVP Scope
@@ -83,7 +83,7 @@ Prompt Opinion UI / Agent
         |
         | MCP tool invocation with SHARP context
         v
-CareAccess AI MCP Server
+CareAccess MCP Server
         |
         +-- FHIR service
         |     Reads patient, medication, condition, and encounter context
@@ -104,7 +104,7 @@ Structured MCP tool response
 | --- | --- |
 | Backend | Node.js, Express.js, TypeScript |
 | MCP | Model Context Protocol server tools |
-| AI | Gemini API |
+| Generation | Gemini API |
 | Healthcare context | FHIR R4, SHARP context propagation |
 | Data | Synthetic payer rules and mock coverage data |
 | Database | PostgreSQL |
@@ -115,7 +115,7 @@ Structured MCP tool response
 ## Suggested Folder Structure
 
 ```text
-careaccess-ai/
+careaccess-mcp/
 |-- src/
 |   |-- server.ts
 |   |-- mcp/
@@ -164,7 +164,7 @@ npm run dev
 
 ## Prompt Opinion Integration
 
-1. Publish CareAccess AI as an MCP server.
+1. Publish CareAccess MCP as an MCP server.
 2. Register the MCP tools in the Prompt Opinion Marketplace.
 3. Enable SHARP context propagation for patient and FHIR access context.
 4. Test invocation from a Prompt Opinion agent or workspace.
@@ -179,7 +179,7 @@ npm run dev
 
 ## Hackathon Alignment
 
-**AI Factor:** Uses Gemini to summarize rules, explain benefits, and draft prior
+**Gemini Usage:** Uses Gemini to summarize rules, explain benefits, and draft prior
 authorization packets.
 
 **MCP Fit:** Exposes coverage intelligence as reusable MCP tools that other
