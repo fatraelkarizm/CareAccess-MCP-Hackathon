@@ -19,6 +19,49 @@ SYNTHETIC_PAYER_RULES = {
                 "Previous metformin trial or contraindication",
                 "Current medication list",
             ],
+        },
+        "lumbar spine mri": {
+            "treatment": "Lumbar Spine MRI",
+            "coverage": "covered_with_prior_auth",
+            "prior_auth_required": True,
+            "estimated_patient_cost": "$150 imaging copay",
+            "covered_alternative": "Lumbar spine X-ray",
+            "reason": (
+                "Advanced imaging requires documentation of neurologic findings "
+                "or persistent symptoms after conservative therapy."
+            ),
+            "documentation_required": [
+                "Duration of symptoms",
+                "Conservative therapy history",
+                "Neurologic exam findings",
+                "Prior imaging results if available",
+            ],
+        },
+        "hba1c lab": {
+            "treatment": "HbA1c Lab",
+            "coverage": "covered",
+            "prior_auth_required": False,
+            "estimated_patient_cost": "$0 preventive lab benefit",
+            "covered_alternative": None,
+            "reason": (
+                "HbA1c testing is covered for diabetes monitoring under the "
+                "synthetic preventive and chronic care lab benefit."
+            ),
+            "documentation_required": [
+                "Diabetes diagnosis or monitoring indication",
+            ],
+        },
+        "wegovy": {
+            "treatment": "Wegovy",
+            "coverage": "not_covered",
+            "prior_auth_required": False,
+            "estimated_patient_cost": "full retail cost",
+            "covered_alternative": "Nutrition counseling benefit",
+            "reason": (
+                "Plan excludes weight-loss medications unless a separate employer "
+                "rider is present in the synthetic benefit design."
+            ),
+            "documentation_required": [],
         }
     }
 }

@@ -87,6 +87,19 @@ class CoverageToolsTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("Prior Authorization Draft", result)
         self.assertIn("Human Review Required", result)
 
+    async def test_assess_treatment_access_handles_not_covered_scenario(self):
+        result = await assess_treatment_access(
+            treatment="Wegovy",
+            plan="Acme Silver PPO",
+            diagnosis="Weight management",
+            patient_summary="Synthetic patient seeking weight management therapy",
+            clinical_context="No diabetes diagnosis documented",
+        )
+
+        self.assertIn("Coverage: not_covered", result)
+        self.assertIn("Discuss covered alternatives", result)
+        self.assertIn("Nutrition counseling benefit", result)
+
 
 if __name__ == "__main__":
     unittest.main()

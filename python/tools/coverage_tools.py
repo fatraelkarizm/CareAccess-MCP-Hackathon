@@ -127,11 +127,12 @@ async def assess_treatment_access(
 ) -> str:
     decision = _decision(treatment, plan, diagnosis, clinical_context)
     packet = generate_prior_auth_packet(patient_summary=patient_summary, decision=decision)
-    next_action = (
-        "Review and submit the prior authorization packet."
-        if decision["prior_auth_required"]
-        else "Proceed with ordering workflow if clinically appropriate."
-    )
+    if decision["coverage"] == "not_covered":
+        next_action = "Discuss covered alternatives, cash-pay implications, or appeal options with the patient."
+    elif decision["prior_auth_required"]:
+        next_action = "Review and submit the prior authorization packet."
+    else:
+        next_action = "Proceed with ordering workflow if clinically appropriate."
 
     brief = f"""# CareAccess MCP Treatment Access Brief
 

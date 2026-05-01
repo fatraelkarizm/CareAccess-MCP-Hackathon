@@ -69,6 +69,8 @@ The best single-call demo tool is `assessTreatmentAccess`. It returns a polished
 Treatment Access Brief with the access decision, reason, next best action, and
 prior authorization packet preview.
 
+For the suggested 3-minute walkthrough, see `DEMO.md`.
+
 ## Architecture
 
 ```text
@@ -100,6 +102,7 @@ This repository is based on the Prompt Opinion community MCP starter. The projec
 |-- python/              # Primary implementation target for CareAccess MCP
 |-- typescript/          # Reference implementation from the starter
 |-- scripts/             # Local Docker helper scripts
+|-- DEMO.md              # 3-minute demo script and validation commands
 |-- HACKATHON-TASK.md    # Hackathon notes and positioning
 |-- UPSTREAM-README.md   # Original Prompt Opinion starter README
 `-- README.md            # CareAccess MCP product showcase
