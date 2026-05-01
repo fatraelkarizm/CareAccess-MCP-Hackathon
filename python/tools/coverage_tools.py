@@ -1,7 +1,12 @@
 from typing import Annotated
 
+from mcp.server.fastmcp import Context
 from pydantic import Field
 
+from fhir_client import FhirClient
+from fhir_patient_summary import build_patient_summary
+from fhir_utilities import get_fhir_context, get_patient_id_if_context_exists
+from gemini_generation import generate_prior_auth_draft
 from insurance_rules import generate_prior_auth_packet, get_coverage_decision
 from mcp_utilities import create_text_response
 
@@ -22,6 +27,43 @@ def _decision(
         diagnosis=diagnosis,
         clinical_context=clinical_context,
     )
+
+
+async def _patient_summary_from_fhir_context(ctx: Context | None) -> str | None:
+    if not ctx:
+        return None
+
+    fhir_context = get_fhir_context(ctx)
+    patient_id = get_patient_id_if_context_exists(ctx)
+    if not fhir_context or not patient_id:
+        return None
+
+    fhir_client = FhirClient(base_url=fhir_context.url, token=fhir_context.token)
+    patient = await fhir_client.read(f"Patient/{patient_id}")
+    if not patient:
+        return None
+
+    condition_bundle = await fhir_client.search("Condition", {"patient": patient_id})
+    conditions = [
+        entry["resource"]
+        for entry in (condition_bundle or {}).get("entry", [])
+        if entry.get("resource")
+    ]
+    return build_patient_summary(patient, conditions)
+
+
+async def _resolve_patient_summary(
+    patient_summary: str | None,
+    ctx: Context | None,
+) -> tuple[str, str]:
+    if patient_summary:
+        return patient_summary, "manual input"
+
+    fhir_summary = await _patient_summary_from_fhir_context(ctx)
+    if fhir_summary:
+        return fhir_summary, "SHARP/FHIR context"
+
+    return "Synthetic/de-identified patient context unavailable", "fallback"
 
 
 async def verify_coverage(
@@ -95,11 +137,18 @@ async def generate_prior_auth(
     treatment: Annotated[str, Field(description="Treatment needing prior authorization")],
     plan: Annotated[str, Field(description="Synthetic insurance plan name")],
     diagnosis: Annotated[str, Field(description="Relevant diagnosis or condition")],
-    patient_summary: Annotated[str, Field(description="Short synthetic or de-identified patient summary")],
+    patient_summary: Annotated[str | None, Field(description="Short synthetic or de-identified patient summary. Optional when SHARP/FHIR patient context is available.")] = None,
     clinical_context: Annotated[str | None, Field(description="Short clinical context for the request")] = None,
+    ctx: Context = None,
 ) -> str:
+    resolved_summary, _ = await _resolve_patient_summary(patient_summary, ctx)
     decision = _decision(treatment, plan, diagnosis, clinical_context)
-    packet = generate_prior_auth_packet(patient_summary=patient_summary, decision=decision)
+    fallback_packet = generate_prior_auth_packet(patient_summary=resolved_summary, decision=decision)
+    packet = await generate_prior_auth_draft(
+        decision=decision,
+        patient_summary=resolved_summary,
+        fallback_text=fallback_packet,
+    )
     return create_text_response(packet)
 
 
@@ -122,11 +171,18 @@ async def assess_treatment_access(
     treatment: Annotated[str, Field(description="Treatment to assess for access barriers")],
     plan: Annotated[str, Field(description="Synthetic insurance plan name")],
     diagnosis: Annotated[str, Field(description="Relevant diagnosis or condition")],
-    patient_summary: Annotated[str, Field(description="Short synthetic or de-identified patient summary")],
+    patient_summary: Annotated[str | None, Field(description="Short synthetic or de-identified patient summary. Optional when SHARP/FHIR patient context is available.")] = None,
     clinical_context: Annotated[str | None, Field(description="Short clinical context for the request")] = None,
+    ctx: Context = None,
 ) -> str:
+    resolved_summary, context_source = await _resolve_patient_summary(patient_summary, ctx)
     decision = _decision(treatment, plan, diagnosis, clinical_context)
-    packet = generate_prior_auth_packet(patient_summary=patient_summary, decision=decision)
+    fallback_packet = generate_prior_auth_packet(patient_summary=resolved_summary, decision=decision)
+    packet = await generate_prior_auth_draft(
+        decision=decision,
+        patient_summary=resolved_summary,
+        fallback_text=fallback_packet,
+    )
     if decision["coverage"] == "not_covered":
         next_action = "Discuss covered alternatives, cash-pay implications, or appeal options with the patient."
     elif decision["prior_auth_required"]:
@@ -138,7 +194,8 @@ async def assess_treatment_access(
 
 Treatment: {decision["treatment"]}
 Plan: {decision["plan"]}
-Patient: {patient_summary}
+Patient: {resolved_summary}
+Context source: {context_source}
 
 ## Access Decision
 - Coverage: {decision["coverage"]}

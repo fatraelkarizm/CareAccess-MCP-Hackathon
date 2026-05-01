@@ -83,9 +83,22 @@ class CoverageToolsTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertIn("CareAccess MCP Treatment Access Brief", result)
         self.assertIn("Coverage: covered_with_prior_auth", result)
+        self.assertIn("Context source: manual input", result)
         self.assertIn("Next best action", result)
         self.assertIn("Prior Authorization Draft", result)
         self.assertIn("Human Review Required", result)
+
+    async def test_assess_treatment_access_allows_missing_patient_summary(self):
+        result = await assess_treatment_access(
+            treatment="HbA1c Lab",
+            plan="Acme Silver PPO",
+            diagnosis="Type 2 Diabetes",
+            clinical_context="Routine diabetes monitoring",
+        )
+
+        self.assertIn("Coverage: covered", result)
+        self.assertIn("Context source: fallback", result)
+        self.assertIn("Synthetic/de-identified patient context unavailable", result)
 
     async def test_assess_treatment_access_handles_not_covered_scenario(self):
         result = await assess_treatment_access(

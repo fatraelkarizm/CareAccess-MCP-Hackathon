@@ -27,15 +27,14 @@ support, not medical advice or a payer guarantee.
    http://127.0.0.1:8000/
    ```
 
-   Show that the CareAccess MCP server is running.
-
-2. Explain the hero tool:
+2. Explain the hero MCP tool:
 
    ```text
    assessTreatmentAccess
    ```
 
-   This single MCP tool runs the full showcase workflow.
+   This single tool runs coverage, prior authorization, cost, alternative, and
+   packet generation in one call.
 
 3. Run the Semaglutide scenario:
 
@@ -79,6 +78,7 @@ support, not medical advice or a payer guarantee.
    - Covered alternative: Metformin ER
    - Next best action: review and submit prior authorization packet
    - Human review required before submission
+   - Context source: manual input locally, SHARP/FHIR context when invoked with patient context headers
 
 5. Close with marketplace value:
 
@@ -87,8 +87,6 @@ support, not medical advice or a payer guarantee.
    of locking it inside one app.
 
 ## Extra Scenarios
-
-Use these if the demo needs more variety.
 
 ### Imaging Prior Authorization
 
@@ -124,6 +122,7 @@ Expected: Not covered, full retail cost, suggest nutrition counseling benefit
 
 - MCP fit: tools are discoverable and callable through a standard protocol.
 - Healthcare fit: the server declares SHARP/FHIR context capability.
+- Gemini fit: Gemini can generate the prior authorization draft when `GEMINI_API_KEY` is available, while deterministic rules still make the coverage decision.
 - Impact: targets treatment delays caused by coverage uncertainty and prior auth.
 - Safety: synthetic data, human review, no payer guarantee, no medical advice.
 - Feasibility: works locally today and can be expanded with real payer/FHIR data.

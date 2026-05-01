@@ -128,11 +128,41 @@ synthetic payer rules in `python/insurance_rules.py`.
 
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.0-flash
 FHIR_BASE_URL=https://your-fhir-server.example
 PORT=3000
 ```
 
 For the hackathon demo, payer rules and coverage data can be synthetic and local. A production version would require real payer integrations, stronger audit controls, and validated cost estimation logic.
+
+`GEMINI_API_KEY` is optional for local validation. When present, CareAccess MCP
+uses Gemini to generate a more natural prior authorization draft from the
+structured coverage decision. If the key is missing or Gemini is unavailable, the
+server falls back to a deterministic local packet template.
+
+Coverage decisions are always made by synthetic payer rules, not by Gemini.
+Gemini is used only for human-readable generation.
+
+## SHARP/FHIR Context
+
+The server declares the Prompt Opinion FHIR context extension:
+
+```text
+ai.promptopinion/fhir-context
+```
+
+When Prompt Opinion invokes the MCP server with SHARP/FHIR context headers,
+CareAccess MCP can use:
+
+- `x-fhir-server-url`
+- `x-fhir-access-token`
+- `x-patient-id`
+
+If `patient_summary` is not provided to `assessTreatmentAccess` or
+`generatePriorAuth`, the tool tries to read `Patient/{id}` and the patient's
+`Condition` resources from the provided FHIR server. If FHIR context is not
+available, it falls back to synthetic/de-identified input so the hackathon demo
+still runs locally.
 
 ## Running the Python Starter
 
