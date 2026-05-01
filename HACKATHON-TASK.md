@@ -60,6 +60,8 @@ CareAccess MCP should be positioned as an **MCP Superpower**:
 - It uses Gemini to generate reviewable explanations and prior authorization
   drafts.
 - It returns structured outputs that clinicians or other agents can act on.
+- It will be implemented primarily in the Python MCP starter, with TypeScript
+  kept as a short-term reference implementation.
 
 ## Important Dates
 

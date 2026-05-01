@@ -88,27 +88,26 @@ Structured MCP response
 
 ## Repository Structure
 
-This repository is based on the Prompt Opinion community MCP starter. It includes multiple implementation examples:
+This repository is based on the Prompt Opinion community MCP starter. The project is now focused on the Python implementation, with the TypeScript starter kept as a reference while the first CareAccess tools are built.
 
 ```text
 .
-|-- typescript/          # Primary implementation target for CareAccess MCP
-|-- python/              # Reference implementation from the starter
-|-- dotnet/              # Reference implementation from the starter
+|-- python/              # Primary implementation target for CareAccess MCP
+|-- typescript/          # Reference implementation from the starter
 |-- scripts/             # Local Docker helper scripts
 |-- HACKATHON-TASK.md    # Hackathon notes and positioning
 |-- UPSTREAM-README.md   # Original Prompt Opinion starter README
 `-- README.md            # CareAccess MCP product showcase
 ```
 
-The current product direction is to implement the showcase tools in `typescript/tools/` because the starter already includes MCP tool examples such as `PatientAgeTool.ts` and `PatientIdTool.ts`.
+The current product direction is to implement the showcase tools in `python/tools/` because the Python starter already includes MCP tool examples such as `patient_age_tool.py`, `patient_allergies_tool.py`, and `patient_id_tool.py`.
 
 ## Tech Direction
 
 | Area | Direction |
 | --- | --- |
 | Track | Prompt Opinion Superpower, powered by MCP |
-| Primary implementation | TypeScript MCP server |
+| Primary implementation | Python MCP server |
 | Healthcare context | SHARP-on-MCP and FHIR R4 context |
 | Demo data | Synthetic patient, plan, and payer rules |
 | Generation | Gemini API for explanations and PA packet drafts |
@@ -124,13 +123,27 @@ PORT=3000
 
 For the hackathon demo, payer rules and coverage data can be synthetic and local. A production version would require real payer integrations, stronger audit controls, and validated cost estimation logic.
 
-## Running the TypeScript Starter
+## Running the Python Starter
+
+On Windows:
 
 ```bash
-cd typescript
-npm install
-npm run start
+cd python
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn main:app --reload
 ```
+
+The server runs at `http://localhost:8000`.
+
+With Docker from the repository root:
+
+```bash
+docker compose -f docker-compose-local.yml up python --build
+```
+
+The Docker service maps the Python server to `http://localhost:55002`.
 
 ## Hackathon Positioning
 
