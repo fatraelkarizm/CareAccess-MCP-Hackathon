@@ -116,3 +116,46 @@ async def explain_benefits(
         f"{decision['estimated_patient_cost']}. "
         "This is an estimate for decision support, not a payer guarantee."
     )
+
+
+async def assess_treatment_access(
+    treatment: Annotated[str, Field(description="Treatment to assess for access barriers")],
+    plan: Annotated[str, Field(description="Synthetic insurance plan name")],
+    diagnosis: Annotated[str, Field(description="Relevant diagnosis or condition")],
+    patient_summary: Annotated[str, Field(description="Short synthetic or de-identified patient summary")],
+    clinical_context: Annotated[str | None, Field(description="Short clinical context for the request")] = None,
+) -> str:
+    decision = _decision(treatment, plan, diagnosis, clinical_context)
+    packet = generate_prior_auth_packet(patient_summary=patient_summary, decision=decision)
+    next_action = (
+        "Review and submit the prior authorization packet."
+        if decision["prior_auth_required"]
+        else "Proceed with ordering workflow if clinically appropriate."
+    )
+
+    brief = f"""# CareAccess MCP Treatment Access Brief
+
+Treatment: {decision["treatment"]}
+Plan: {decision["plan"]}
+Patient: {patient_summary}
+
+## Access Decision
+- Coverage: {decision["coverage"]}
+- Prior authorization required: {_format_yes_no(decision["prior_auth_required"])}
+- Estimated patient cost: {decision["estimated_patient_cost"]}
+- Covered alternative: {decision.get("covered_alternative") or "No covered alternative listed."}
+
+## Why
+{decision["reason"]}
+
+## Next best action
+{next_action}
+
+## Prior Authorization Packet Preview
+{packet}
+
+## Safety Note
+This output is decision support based on synthetic rules. It is not medical advice or a payer guarantee.
+"""
+
+    return create_text_response(brief)

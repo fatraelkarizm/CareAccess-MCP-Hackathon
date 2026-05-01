@@ -1,6 +1,7 @@
 import unittest
 
 from tools.coverage_tools import (
+    assess_treatment_access,
     check_prior_auth,
     estimate_cost,
     explain_benefits,
@@ -70,6 +71,21 @@ class CoverageToolsTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertIn("Your plan lists Semaglutide", result)
         self.assertIn("$75/month", result)
+
+    async def test_assess_treatment_access_returns_showcase_brief(self):
+        result = await assess_treatment_access(
+            treatment="Semaglutide",
+            plan="Acme Silver PPO",
+            diagnosis="Type 2 Diabetes",
+            patient_summary="Synthetic patient with Type 2 Diabetes",
+            clinical_context="A1C above goal after metformin trial",
+        )
+
+        self.assertIn("CareAccess MCP Treatment Access Brief", result)
+        self.assertIn("Coverage: covered_with_prior_auth", result)
+        self.assertIn("Next best action", result)
+        self.assertIn("Prior Authorization Draft", result)
+        self.assertIn("Human Review Required", result)
 
 
 if __name__ == "__main__":

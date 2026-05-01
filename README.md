@@ -42,6 +42,7 @@ CareAccess MCP is not a diagnosis tool, medical advice engine, payer guarantee, 
 
 | Tool | Showcase Role |
 | --- | --- |
+| `assessTreatmentAccess` | Runs the full showcase flow in one call: coverage, prior authorization, cost, alternative, and packet preview. |
 | `verifyCoverage` | Returns whether the requested treatment is likely covered under the synthetic plan. |
 | `checkPriorAuth` | Explains whether prior authorization is required and what rule triggered it. |
 | `estimateCost` | Estimates patient responsibility from synthetic benefit data. |
@@ -63,6 +64,10 @@ Estimated patient cost: $75/month
 Covered alternative: Metformin ER, fully covered
 Generated artifact: Draft prior authorization packet
 ```
+
+The best single-call demo tool is `assessTreatmentAccess`. It returns a polished
+Treatment Access Brief with the access decision, reason, next best action, and
+prior authorization packet preview.
 
 ## Architecture
 

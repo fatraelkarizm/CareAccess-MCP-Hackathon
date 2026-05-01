@@ -1,5 +1,6 @@
 from mcp.server.fastmcp import FastMCP
 from tools.coverage_tools import (
+    assess_treatment_access,
     check_prior_auth,
     estimate_cost,
     explain_benefits,
@@ -42,3 +43,4 @@ mcp.tool(name="estimateCost", description="Estimates patient responsibility from
 mcp.tool(name="generatePriorAuth", description="Generates a reviewable prior authorization draft.")(generate_prior_auth)
 mcp.tool(name="suggestAlternatives", description="Suggests covered alternatives from synthetic payer rules.")(suggest_alternatives)
 mcp.tool(name="explainBenefits", description="Explains coverage details in patient-friendly language.")(explain_benefits)
+mcp.tool(name="assessTreatmentAccess", description="Runs the full CareAccess coverage, prior authorization, cost, alternative, and draft packet workflow.")(assess_treatment_access)
