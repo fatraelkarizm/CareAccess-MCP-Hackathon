@@ -3,7 +3,7 @@ from tools.patient_age_tool import get_patient_age
 from tools.patient_allergies_tool import get_patient_allergies
 from tools.patient_id_tool import find_patient_id
 
-mcp = FastMCP("Python Template", stateless_http=True, host="0.0.0.0")
+mcp = FastMCP("CareAccess MCP", stateless_http=True, host="0.0.0.0")
 
 _original_get_capabilities = mcp._mcp_server.get_capabilities
 

@@ -125,9 +125,16 @@ For the hackathon demo, payer rules and coverage data can be synthetic and local
 
 ## Running the Python Starter
 
+The Python server is the main CareAccess MCP implementation target. The root URL
+is only a small health/info endpoint. The real MCP endpoint is `/mcp`, and it is
+meant to be called by Prompt Opinion or an MCP client, not by opening it directly
+in a normal browser tab.
+
+### First-Time Setup
+
 On Windows:
 
-```bash
+```powershell
 cd python
 python -m venv venv
 venv\Scripts\activate
@@ -135,15 +142,88 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-The server runs at `http://localhost:8000`.
+The server runs at:
+
+```text
+http://127.0.0.1:8000
+```
+
+Open that URL in a browser. You should see a small JSON response saying the
+server is running.
+
+### Run Again Later
+
+After dependencies are installed once, you only need:
+
+```powershell
+cd python
+venv\Scripts\activate
+uvicorn main:app --reload
+```
+
+### Test the MCP Endpoint
+
+Opening `/mcp` directly in a browser can return `406 Not Acceptable`. That is
+normal because MCP expects a JSON-RPC request with MCP-compatible headers.
+
+Use this PowerShell smoke test from the repository root:
+
+```powershell
+$headers = @{
+  Accept = "application/json, text/event-stream"
+  "Content-Type" = "application/json"
+}
+
+$body = @{
+  jsonrpc = "2.0"
+  id = 1
+  method = "initialize"
+  params = @{
+    protocolVersion = "2025-06-18"
+    capabilities = @{}
+    clientInfo = @{
+      name = "local-smoke-test"
+      version = "0.1.0"
+    }
+  }
+} | ConvertTo-Json -Depth 10
+
+Invoke-WebRequest `
+  -Uri http://127.0.0.1:8000/mcp `
+  -Method Post `
+  -Headers $headers `
+  -Body $body `
+  -UseBasicParsing
+```
+
+Expected result: HTTP `200` with MCP initialize data, including the
+`ai.promptopinion/fhir-context` capability.
+
+### Stop the Server
+
+If uvicorn is running in your current terminal, press `Ctrl+C`.
+
+If it was started in the background, find and stop it with:
+
+```powershell
+Get-CimInstance Win32_Process |
+  Where-Object { $_.CommandLine -match "uvicorn" -and $_.CommandLine -match "main:app" } |
+  ForEach-Object { Stop-Process -Id $_.ProcessId }
+```
+
+### Docker Option
 
 With Docker from the repository root:
 
-```bash
+```powershell
 docker compose -f docker-compose-local.yml up python --build
 ```
 
-The Docker service maps the Python server to `http://localhost:55002`.
+The Docker service maps the Python server to:
+
+```text
+http://127.0.0.1:55002
+```
 
 ## Hackathon Positioning
 

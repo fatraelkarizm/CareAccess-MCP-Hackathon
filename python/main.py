@@ -21,4 +21,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.get("/")
+async def root():
+    return {
+        "name": "CareAccess MCP",
+        "status": "running",
+        "mcp_endpoint": "/mcp",
+        "note": "Use an MCP client or JSON-RPC request to call the MCP endpoint.",
+    }
+
+
 app.mount("/", mcp.streamable_http_app())
