@@ -38,7 +38,7 @@ The first showcase flow is intentionally narrow:
 
 CareAccess MCP is not a diagnosis tool, medical advice engine, payer guarantee, or patient-facing chatbot. It is decision support for insurance access workflows, using synthetic or de-identified data for the hackathon demo.
 
-## Planned MCP Tools
+## Implemented MVP MCP Tools
 
 | Tool | Showcase Role |
 | --- | --- |
@@ -101,6 +101,9 @@ This repository is based on the Prompt Opinion community MCP starter. The projec
 ```
 
 The current product direction is to implement the showcase tools in `python/tools/` because the Python starter already includes MCP tool examples such as `patient_age_tool.py`, `patient_allergies_tool.py`, and `patient_id_tool.py`.
+
+CareAccess-specific MVP tools live in `python/tools/coverage_tools.py`, with
+synthetic payer rules in `python/insurance_rules.py`.
 
 ## Tech Direction
 
