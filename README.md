@@ -1,8 +1,8 @@
-# CareAccess MCP
+# PriorMCP
 
 > A Prompt Opinion MCP Superpower for checking insurance coverage, prior authorization, patient cost, and reviewable prior authorization drafts from healthcare context.
 
-CareAccess MCP is a healthcare MCP server concept for the **Agents Assemble: Healthcare AI Endgame Challenge**. The goal is not to build a standalone healthcare app. The goal is to build a focused **MCP Superpower** that other agents in Prompt Opinion can invoke when a clinician needs insurance access guidance at the point of care.
+PriorMCP is a healthcare MCP server concept for the **Agents Assemble: Healthcare AI Endgame Challenge**. The goal is not to build a standalone healthcare app. The goal is to build a focused **MCP Superpower** that other agents in Prompt Opinion can invoke when a clinician needs insurance access guidance at the point of care.
 
 ## The Core Idea
 
@@ -10,19 +10,19 @@ Clinicians often choose treatments without real-time visibility into insurance
 rules. That creates delayed care, surprise costs, extra administrative work, and
 avoidable denials.
 
-CareAccess MCP turns coverage checks into an agent-ready workflow:
+PriorMCP turns coverage checks into an agent-ready workflow:
 
 1. Receive patient and encounter context from Prompt Opinion through SHARP/FHIR.
 2. Match the requested treatment against synthetic payer rules.
 3. Use Gemini to generate clear clinical and patient-facing explanations.
 4. Return structured outputs that another agent or clinician can act on.
 
-In short: **CareAccess MCP is an insurance coverage and prior authorization
+In short: **PriorMCP is an insurance coverage and prior authorization
 superpower for healthcare agents.**
 
 ## What We Are Building
 
-CareAccess MCP will expose a small set of MCP tools that answer practical insurance access questions:
+PriorMCP will expose a small set of MCP tools that answer practical insurance access questions:
 
 - Is this medication, procedure, imaging order, or lab likely covered?
 - Does it require prior authorization?
@@ -32,11 +32,11 @@ CareAccess MCP will expose a small set of MCP tools that answer practical insura
 
 The first showcase flow is intentionally narrow:
 
-> A clinician wants to prescribe Semaglutide for a synthetic Type 2 Diabetes patient. CareAccess MCP checks synthetic payer rules, identifies that prior authorization is required, estimates patient cost, suggests a covered alternative, and generates a draft prior authorization packet.
+> A clinician wants to prescribe Semaglutide for a synthetic Type 2 Diabetes patient. PriorMCP checks synthetic payer rules, identifies that prior authorization is required, estimates patient cost, suggests a covered alternative, and generates a draft prior authorization packet.
 
 ## What This Is Not
 
-CareAccess MCP is not a diagnosis tool, medical advice engine, payer guarantee, or patient-facing chatbot. It is decision support for insurance access workflows, using synthetic or de-identified data for the hackathon demo.
+PriorMCP is not a diagnosis tool, medical advice engine, payer guarantee, or patient-facing chatbot. It is decision support for insurance access workflows, using synthetic or de-identified data for the hackathon demo.
 
 ## Implemented MVP MCP Tools
 
@@ -78,7 +78,7 @@ Prompt Opinion Agent
         |
         | MCP tool call + SHARP/FHIR context
         v
-CareAccess MCP Server
+PriorMCP Server
         |
         +-- FHIR context utilities
         |     Reads patient and encounter context from SHARP/FHIR payloads
@@ -95,22 +95,22 @@ Structured MCP response
 
 ## Repository Structure
 
-This repository is based on the Prompt Opinion community MCP starter. The project is now focused on the Python implementation, with the TypeScript starter kept as a reference while the first CareAccess tools are built.
+This repository is based on the Prompt Opinion community MCP starter. The project is now focused on the Python implementation, with the TypeScript starter kept as a reference while the first PriorMCP tools are built.
 
 ```text
 .
-|-- python/              # Primary implementation target for CareAccess MCP
+|-- python/              # Primary implementation target for PriorMCP
 |-- typescript/          # Reference implementation from the starter
 |-- scripts/             # Local Docker helper scripts
 |-- DEMO.md              # 3-minute demo script and validation commands
 |-- HACKATHON-TASK.md    # Hackathon notes and positioning
 |-- UPSTREAM-README.md   # Original Prompt Opinion starter README
-`-- README.md            # CareAccess MCP product showcase
+`-- README.md            # PriorMCP product showcase
 ```
 
 The current product direction is to implement the showcase tools in `python/tools/` because the Python starter already includes MCP tool examples such as `patient_age_tool.py`, `patient_allergies_tool.py`, and `patient_id_tool.py`.
 
-CareAccess-specific MVP tools live in `python/tools/coverage_tools.py`, with
+PriorMCP-specific MVP tools live in `python/tools/coverage_tools.py`, with
 synthetic payer rules in `python/insurance_rules.py`.
 
 ## Tech Direction
@@ -135,7 +135,7 @@ PORT=3000
 
 For the hackathon demo, payer rules and coverage data can be synthetic and local. A production version would require real payer integrations, stronger audit controls, and validated cost estimation logic.
 
-`GEMINI_API_KEY` is optional for local validation. When present, CareAccess MCP
+`GEMINI_API_KEY` is optional for local validation. When present, PriorMCP
 uses Gemini to generate a more natural prior authorization draft from the
 structured coverage decision. If the key is missing or Gemini is unavailable, the
 server falls back to a deterministic local packet template.
@@ -152,7 +152,7 @@ ai.promptopinion/fhir-context
 ```
 
 When Prompt Opinion invokes the MCP server with SHARP/FHIR context headers,
-CareAccess MCP can use:
+PriorMCP can use:
 
 - `x-fhir-server-url`
 - `x-fhir-access-token`
@@ -166,7 +166,7 @@ still runs locally.
 
 ## Running the Python Starter
 
-The Python server is the main CareAccess MCP implementation target. The root URL
+The Python server is the main PriorMCP implementation target. The root URL
 is only a small health/info endpoint. The real MCP endpoint is `/mcp`, and it is
 meant to be called by Prompt Opinion or an MCP client, not by opening it directly
 in a normal browser tab.
@@ -268,7 +268,7 @@ http://127.0.0.1:55002
 
 ## Hackathon Positioning
 
-**MCP Fit:** CareAccess MCP exposes reusable insurance access tools that any Prompt Opinion agent can invoke.
+**MCP Fit:** PriorMCP exposes reusable insurance access tools that any Prompt Opinion agent can invoke.
 
 **FHIR/SHARP Fit:** The tools are designed to use healthcare context instead of custom one-off payloads.
 

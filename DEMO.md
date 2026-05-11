@@ -1,16 +1,16 @@
-# CareAccess MCP Demo Script
+# PriorMCP Demo Script
 
 This is a 3-minute demo outline for the Prompt Opinion Agents Assemble Hackathon.
 
 ## Demo Goal
 
-Show that CareAccess MCP is not a generic chatbot. It is a reusable MCP
+Show that PriorMCP is not a generic chatbot. It is a reusable MCP
 Superpower that gives healthcare agents a concrete insurance access workflow:
 coverage, prior authorization, cost, alternatives, and a reviewable packet draft.
 
 ## 30-Second Pitch
 
-CareAccess MCP helps healthcare agents remove insurance friction at the point of
+PriorMCP helps healthcare agents remove insurance friction at the point of
 care. When a clinician wants to order a treatment, the agent can call this MCP
 server to check whether the treatment is covered, whether prior authorization is
 needed, what the patient may pay, what alternatives are covered, and what packet
@@ -82,7 +82,7 @@ support, not medical advice or a payer guarantee.
 
 5. Close with marketplace value:
 
-   CareAccess MCP can be invoked by any Prompt Opinion agent that needs insurance
+  PriorMCP can be invoked by any Prompt Opinion agent that needs insurance
    access intelligence. The MCP interface makes the capability reusable instead
    of locking it inside one app.
 

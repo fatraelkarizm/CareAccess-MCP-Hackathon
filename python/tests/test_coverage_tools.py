@@ -81,7 +81,7 @@ class CoverageToolsTests(unittest.IsolatedAsyncioTestCase):
             clinical_context="A1C above goal after metformin trial",
         )
 
-        self.assertIn("CareAccess MCP Treatment Access Brief", result)
+        self.assertIn("PriorMCP Treatment Access Brief", result)
         self.assertIn("Coverage: covered_with_prior_auth", result)
         self.assertIn("Context source: manual input", result)
         self.assertIn("Next best action", result)

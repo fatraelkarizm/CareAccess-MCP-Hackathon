@@ -30,7 +30,7 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {
-        "name": "CareAccess MCP",
+        "name": "PriorMCP",
         "status": "running",
         "mcp_endpoint": "/mcp",
         "gemini": "configured" if os.getenv("GEMINI_API_KEY") else "not_configured",

@@ -19,7 +19,7 @@ with the Prompt Opinion platform.
 Create an MCP server that exposes a focused set of healthcare tools. These tools
 can be discovered and invoked by agents inside the Prompt Opinion ecosystem.
 
-This is the best fit for **CareAccess MCP** because the project exposes reusable
+This is the best fit for **PriorMCP** because the project exposes reusable
 insurance access tools such as coverage verification, prior authorization checks,
 cost estimation, and prior authorization packet generation.
 
@@ -50,9 +50,9 @@ use case instead of implementing the protocol from scratch.
 - **Agent composition:** Specialist agents and tools can be combined into larger
   healthcare workflows.
 
-## CareAccess MCP Fit
+## PriorMCP Fit
 
-CareAccess MCP should be positioned as an **MCP Superpower**:
+PriorMCP should be positioned as an **MCP Superpower**:
 
 - It receives patient and clinical context through SHARP/FHIR.
 - It checks synthetic payer rules for coverage, prior authorization, alternatives,

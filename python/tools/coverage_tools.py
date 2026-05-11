@@ -190,7 +190,7 @@ async def assess_treatment_access(
     else:
         next_action = "Proceed with ordering workflow if clinically appropriate."
 
-    brief = f"""# CareAccess MCP Treatment Access Brief
+    brief = f"""# PriorMCP Treatment Access Brief
 
 Treatment: {decision["treatment"]}
 Plan: {decision["plan"]}
