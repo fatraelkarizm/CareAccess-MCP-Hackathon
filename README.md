@@ -1,279 +1,87 @@
-# PriorMCP
-
-> A Prompt Opinion MCP Superpower for checking insurance coverage, prior authorization, patient cost, and reviewable prior authorization drafts from healthcare context.
-
-PriorMCP is a healthcare MCP server concept for the **Agents Assemble: Healthcare AI Endgame Challenge**. The goal is not to build a standalone healthcare app. The goal is to build a focused **MCP Superpower** that other agents in Prompt Opinion can invoke when a clinician needs insurance access guidance at the point of care.
-
-## The Core Idea
-
-Clinicians often choose treatments without real-time visibility into insurance
-rules. That creates delayed care, surprise costs, extra administrative work, and
-avoidable denials.
-
-PriorMCP turns coverage checks into an agent-ready workflow:
-
-1. Receive patient and encounter context from Prompt Opinion through SHARP/FHIR.
-2. Match the requested treatment against synthetic payer rules.
-3. Use Gemini to generate clear clinical and patient-facing explanations.
-4. Return structured outputs that another agent or clinician can act on.
-
-In short: **PriorMCP is an insurance coverage and prior authorization
-superpower for healthcare agents.**
-
-## What We Are Building
-
-PriorMCP will expose a small set of MCP tools that answer practical insurance access questions:
-
-- Is this medication, procedure, imaging order, or lab likely covered?
-- Does it require prior authorization?
-- What patient cost should the clinician expect?
-- If prior authorization is needed, what reviewable packet can be drafted?
-- Are there covered alternatives worth considering?
-
-The first showcase flow is intentionally narrow:
-
-> A clinician wants to prescribe Semaglutide for a synthetic Type 2 Diabetes patient. PriorMCP checks synthetic payer rules, identifies that prior authorization is required, estimates patient cost, suggests a covered alternative, and generates a draft prior authorization packet.
-
-## What This Is Not
-
-PriorMCP is not a diagnosis tool, medical advice engine, payer guarantee, or patient-facing chatbot. It is decision support for insurance access workflows, using synthetic or de-identified data for the hackathon demo.
-
-## Implemented MVP MCP Tools
-
-| Tool | Showcase Role |
-| --- | --- |
-| `assessTreatmentAccess` | Runs the full showcase flow in one call: coverage, prior authorization, cost, alternative, and packet preview. |
-| `verifyCoverage` | Returns whether the requested treatment is likely covered under the synthetic plan. |
-| `checkPriorAuth` | Explains whether prior authorization is required and what rule triggered it. |
-| `estimateCost` | Estimates patient responsibility from synthetic benefit data. |
-| `generatePriorAuth` | Produces a reviewable prior authorization packet draft. |
-| `suggestAlternatives` | Suggests covered alternatives from the mock payer rules. |
-| `explainBenefits` | Converts coverage details into patient-friendly language. |
-
-## Showcase Output
-
-```text
-Treatment: Semaglutide
-Patient context: Synthetic Type 2 Diabetes patient
-Plan: Acme Silver PPO
-
-Coverage: Covered with prior authorization
-Prior authorization: Required
-Reason: GLP-1 medications require diagnosis documentation and prior therapy trial
-Estimated patient cost: $75/month
-Covered alternative: Metformin ER, fully covered
-Generated artifact: Draft prior authorization packet
-```
-
-The best single-call demo tool is `assessTreatmentAccess`. It returns a polished
-Treatment Access Brief with the access decision, reason, next best action, and
-prior authorization packet preview.
-
-For the suggested 3-minute walkthrough, see `DEMO.md`.
-
-## Architecture
-
-```text
-Prompt Opinion Agent
-        |
-        | MCP tool call + SHARP/FHIR context
-        v
-PriorMCP Server
-        |
-        +-- FHIR context utilities
-        |     Reads patient and encounter context from SHARP/FHIR payloads
-        |
-        +-- Synthetic payer rules
-        |     Models coverage, prior authorization, alternatives, and cost rules
-        |
-        +-- Gemini generation
-        |     Drafts explanations and prior authorization text for human review
-        |
-        v
-Structured MCP response
-```
-
-## Repository Structure
-
-This repository is based on the Prompt Opinion community MCP starter. The project is now focused on the Python implementation, with the TypeScript starter kept as a reference while the first PriorMCP tools are built.
-
-```text
-.
-|-- python/              # Primary implementation target for PriorMCP
-|-- typescript/          # Reference implementation from the starter
-|-- scripts/             # Local Docker helper scripts
-|-- DEMO.md              # 3-minute demo script and validation commands
-|-- HACKATHON-TASK.md    # Hackathon notes and positioning
-|-- UPSTREAM-README.md   # Original Prompt Opinion starter README
-`-- README.md            # PriorMCP product showcase
-```
-
-The current product direction is to implement the showcase tools in `python/tools/` because the Python starter already includes MCP tool examples such as `patient_age_tool.py`, `patient_allergies_tool.py`, and `patient_id_tool.py`.
-
-PriorMCP-specific MVP tools live in `python/tools/coverage_tools.py`, with
-synthetic payer rules in `python/insurance_rules.py`.
-
-## Tech Direction
-
-| Area | Direction |
-| --- | --- |
-| Track | Prompt Opinion Superpower, powered by MCP |
-| Primary implementation | Python MCP server |
-| Healthcare context | SHARP-on-MCP and FHIR R4 context |
-| Demo data | Synthetic patient, plan, and payer rules |
-| Generation | Gemini API for explanations and PA packet drafts |
-| Runtime | Local MCP server, publishable to Prompt Opinion Marketplace |
-
-## Environment Variables
-
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_MODEL=gemini-2.0-flash
-FHIR_BASE_URL=https://your-fhir-server.example
-PORT=3000
-```
-
-For the hackathon demo, payer rules and coverage data can be synthetic and local. A production version would require real payer integrations, stronger audit controls, and validated cost estimation logic.
-
-`GEMINI_API_KEY` is optional for local validation. When present, PriorMCP
-uses Gemini to generate a more natural prior authorization draft from the
-structured coverage decision. If the key is missing or Gemini is unavailable, the
-server falls back to a deterministic local packet template.
-
-Coverage decisions are always made by synthetic payer rules, not by Gemini.
-Gemini is used only for human-readable generation.
-
-## SHARP/FHIR Context
-
-The server declares the Prompt Opinion FHIR context extension:
-
-```text
-ai.promptopinion/fhir-context
-```
-
-When Prompt Opinion invokes the MCP server with SHARP/FHIR context headers,
-PriorMCP can use:
-
-- `x-fhir-server-url`
-- `x-fhir-access-token`
-- `x-patient-id`
-
-If `patient_summary` is not provided to `assessTreatmentAccess` or
-`generatePriorAuth`, the tool tries to read `Patient/{id}` and the patient's
-`Condition` resources from the provided FHIR server. If FHIR context is not
-available, it falls back to synthetic/de-identified input so the hackathon demo
-still runs locally.
-
-## Running the Python Starter
-
-The Python server is the main PriorMCP implementation target. The root URL
-is only a small health/info endpoint. The real MCP endpoint is `/mcp`, and it is
-meant to be called by Prompt Opinion or an MCP client, not by opening it directly
-in a normal browser tab.
-
-### First-Time Setup
-
-On Windows:
-
-```powershell
-cd python
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-
-The server runs at:
-
-```text
-http://127.0.0.1:8000
-```
-
-Open that URL in a browser. You should see a small JSON response saying the
-server is running.
-
-### Run Again Later
-
-After dependencies are installed once, you only need:
-
-```powershell
-cd python
-venv\Scripts\activate
-uvicorn main:app --reload
-```
-
-### Test the MCP Endpoint
-
-Opening `/mcp` directly in a browser can return `406 Not Acceptable`. That is
-normal because MCP expects a JSON-RPC request with MCP-compatible headers.
-
-Use this PowerShell smoke test from the repository root:
-
-```powershell
-$headers = @{
-  Accept = "application/json, text/event-stream"
-  "Content-Type" = "application/json"
-}
-
-$body = @{
-  jsonrpc = "2.0"
-  id = 1
-  method = "initialize"
-  params = @{
-    protocolVersion = "2025-06-18"
-    capabilities = @{}
-    clientInfo = @{
-      name = "local-smoke-test"
-      version = "0.1.0"
-    }
-  }
-} | ConvertTo-Json -Depth 10
-
-Invoke-WebRequest `
-  -Uri http://127.0.0.1:8000/mcp `
-  -Method Post `
-  -Headers $headers `
-  -Body $body `
-  -UseBasicParsing
-```
-
-Expected result: HTTP `200` with MCP initialize data, including the
-`ai.promptopinion/fhir-context` capability.
-
-### Stop the Server
-
-If uvicorn is running in your current terminal, press `Ctrl+C`.
-
-If it was started in the background, find and stop it with:
-
-```powershell
-Get-CimInstance Win32_Process |
-  Where-Object { $_.CommandLine -match "uvicorn" -and $_.CommandLine -match "main:app" } |
-  ForEach-Object { Stop-Process -Id $_.ProcessId }
-```
-
-### Docker Option
-
-With Docker from the repository root:
-
-```powershell
+# PriorMCP: Healthcare Insurance Access Agent 🚀
+
+> A Model Context Protocol (MCP) Superpower for real-time insurance coverage verification, prior authorization, cost estimation, and packet generation.
+
+[![Tech Stack: Python](https://img.shields.io/badge/Tech-Python-blue.svg)](https://www.python.org/)
+[![Protocol: MCP](https://img.shields.io/badge/Protocol-MCP-orange.svg)](https://github.com/prompt-opinion/mcp)
+[![AI: Gemini](https://img.shields.io/badge/AI-Google_Gemini-blueviolet.svg)](https://deepmind.google/technologies/gemini/)
+[![Standard: FHIR](https://img.shields.io/badge/Standard-FHIR_R4-red.svg)](https://hl7.org/fhir/)
+
+## 📖 1. Overview
+**PriorMCP** is an interoperable healthcare AI service built as an **MCP Server** for the Prompt Opinion "Agents Assemble" hackathon. Rather than operating as a standalone chatbot, PriorMCP acts as a backend *Superpower* that other healthcare agents can invoke. It provides immediate point-of-care insurance intelligence by analyzing synthetic payer rules, estimating costs, and auto-drafting prior authorization packets using clinical context.
+
+## ⚠️ 2. Problem Statement
+In the healthcare industry, clinicians frequently prescribe treatments or order procedures without real-time visibility into the patient's insurance coverage rules. This lack of transparency causes:
+* **Delayed Care:** Patients wait weeks while administrative staff process prior authorizations manually.
+* **Surprise Costs:** Patients face unexpected out-of-pocket expenses for uncovered treatments.
+* **Administrative Burden:** Clinics spend countless hours deciphering complex payer rules and handling avoidable claim denials.
+
+## 💡 3. Solution
+PriorMCP solves this friction by bringing insurance intelligence directly to the point of care via the Model Context Protocol. By exposing a suite of specialized tools to healthcare AI agents, it seamlessly:
+1. **Ingests Context:** Uses SHARP/FHIR extensions to securely read patient IDs and encounter context from the EHR.
+2. **Evaluates Rules:** Matches the requested treatment against synthetic, deterministic payer policies.
+3. **Generates Intelligence:** Employs **Google Gemini** to instantly draft reviewable, clinical explanations and prior authorization packets.
+4. **Delivers Actionable Outputs:** Returns a structured summary—including coverage status, cost, and covered alternatives—that clinicians or other agents can immediately act upon.
+
+## ⚙️ 4. Key Features & Tech Stack
+
+### Key Features
+* **`assessTreatmentAccess`:** A single-call tool that runs the complete end-to-end workflow (coverage, prior auth, cost, alternative, and packet preview).
+* **Coverage Verification (`verifyCoverage`):** Real-time checks against mocked payer rules.
+* **Prior Authorization Engine (`checkPriorAuth` & `generatePriorAuth`):** Evaluates requirements and auto-drafts submission-ready PA packets for human review.
+* **Cost Estimation (`estimateCost`):** Calculates expected patient responsibility.
+* **EHR Interoperability:** Implements Prompt Opinion's FHIR context extension (`ai.promptopinion/fhir-context`) to support `x-fhir-server-url` and `x-patient-id`.
+
+### Tech Stack
+* **Language & Framework:** Python 3.10+, FastAPI, Uvicorn
+* **Protocol:** Model Context Protocol (via `mcp` / `fastmcp`)
+* **Generative AI:** Google Gemini 2.0 Flash (`google-genai` integration)
+* **Healthcare Standards:** FHIR R4 (Synthetic EHR mockups)
+* **Deployment & Infrastructure:** Docker & Local Virtual Environment
+
+## 🚀 5. Getting Started
+
+Follow these steps to run PriorMCP locally.
+
+### Prerequisites
+* Python 3.10 or higher
+* [Docker](https://www.docker.com/) (Optional, for containerized run)
+* A Google Gemini API Key (`GEMINI_API_KEY`)
+
+### Installation & Local Run (Virtual Environment)
+1. **Clone the repository and navigate to the project directory:**
+   ```bash
+   git clone <your-repo-url>
+   cd healthcare-mcp/python
+   ```
+2. **Set up the virtual environment and install dependencies:**
+   ```bash
+   python -m venv venv
+   # On Windows:
+   venv\Scripts\activate
+   # On macOS/Linux:
+   source venv/bin/activate
+   
+   pip install -r requirements.txt
+   ```
+3. **Configure Environment Variables:**
+   Create a `.env` file in the `python/` directory:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key_here
+   GEMINI_MODEL=gemini-2.0-flash
+   PORT=8000
+   ```
+4. **Start the MCP Server:**
+   ```bash
+   uvicorn main:app --reload
+   ```
+   *The server health endpoint will be running at `http://127.0.0.1:8000`.*
+
+### Installation via Docker
+To run the server in a Docker container, execute from the repository root:
+```bash
 docker compose -f docker-compose-local.yml up python --build
 ```
 
-The Docker service maps the Python server to:
-
-```text
-http://127.0.0.1:55002
-```
-
-## Hackathon Positioning
-
-**MCP Fit:** PriorMCP exposes reusable insurance access tools that any Prompt Opinion agent can invoke.
-
-**FHIR/SHARP Fit:** The tools are designed to use healthcare context instead of custom one-off payloads.
-
-**Gemini Usage:** Gemini helps convert rule results into readable explanations and draft prior authorization text.
-
-**Impact:** The project targets a painful operational gap: treatment delays and administrative work caused by insurance friction.
-
-**Feasibility:** The first demo can work with synthetic payer rules while still representing a realistic point-of-care workflow.
+---
+*Disclaimer: PriorMCP uses synthetic data and rules for demonstration purposes. It is an administrative decision-support tool, not a provider of medical advice or an official payer guarantee.*
